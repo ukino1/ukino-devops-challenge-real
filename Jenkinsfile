@@ -29,21 +29,14 @@ pipeline {
 	
 	stage('Create Docker Image') {
 	    steps {
-		sh 'docker build -t eruobodo/myximage:$BUILD_NUMBER .'
+		sh 'docker build -t eruobodo/devops-challenge-image:$BUILD_NUMBER .'
 	    }
 	}
-	    
-        //stage('Build') {
-        //    steps{
-        //        sh 'docker-compose build'
-        //    }
-       // }
         stage('Push') {
             steps {
               withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                 sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-                //sh 'docker-compose push myapp'
-		sh 'docker push eruobodo/myximage:$BUILD_NUMBER'
+		sh 'docker push eruobodo/devops-challenge-image:$BUILD_NUMBER'
               }
             }
         }
