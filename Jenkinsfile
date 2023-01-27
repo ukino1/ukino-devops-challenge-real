@@ -48,8 +48,8 @@ pipeline {
             steps {
               sh '''
                   aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/c6p1p1z3
-                  docker tag eruobodo/devops-challenge-image:$BUILD_NUMBER public.ecr.aws/c6p1p1z3/devops-code-challenge:$BUILD_NUMBER
-                  docker push public.ecr.aws/c6p1p1z3/devops-code-challenge:$BUILD_NUMBER
+                  docker tag eruobodo/devops-challenge-image:$BUILD_NUMBER public.ecr.aws/c6p1p1z3/devops-code-challenge2:$BUILD_NUMBER
+                  docker push public.ecr.aws/c6p1p1z3/devops-code-challenge2:$BUILD_NUMBER
               '''
             }
       } 
