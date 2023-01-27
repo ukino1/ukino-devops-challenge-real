@@ -3,8 +3,8 @@ pipeline {
   
     environment {
 	    DOCKERHUB_CREDENTIALS=credentials('dockerhub')
-      AWS_DEFAULT_REGION="us-east-1"
-    	THE_BUTLER_SAYS_SO=credentials('aws-cred2')
+	    AWS_DEFAULT_REGION="us-east-1"
+	    THE_BUTLER_SAYS_SO=credentials('aws-cred2')
     }
 
     stages {
@@ -16,42 +16,47 @@ pipeline {
         }
 	    
       stage('Build Backend') {
-                steps {
-        sh 'cd backend && npm ci && npm install'
-                    sh 'cd ..'
+	      steps {
+		      sh 'cd backend && npm ci && npm install'
+		      sh 'cd ..'
                 }
             }
 
       stage('Build Frontend') {
-                steps {
-        sh 'cd frontend && npm ci && npm install && npm run build'
-                    sh 'cd ..'
-                }
-            }
+	      steps {
+		      sh 'cd frontend && npm ci && npm install && npm run build'
+		      sh 'cd ..'
+	      }
+      }
 
       stage('Create Docker Image') {
-          steps {
-        sh 'docker build -t eruobodo/devops-challenge-image:$BUILD_NUMBER .'
-          }
+	      steps {
+		      sh 'docker build -t eruobodo/devops-challenge-image:$BUILD_NUMBER .'
+	      }
       }
       stage('Push') {
-          steps {
-            withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-              sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-              sh 'docker push eruobodo/devops-challenge-image:$BUILD_NUMBER'
-            }
-          }
+	      steps {
+		      withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+			      sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+			      sh 'docker push eruobodo/devops-challenge-image:$BUILD_NUMBER'
+		      }
+	      }
       }
-      }
-
+	    
       stage ('Build and Publish to ECR') {
-            steps {
-              sh '''
-                  aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/c6p1p1z3
-                  docker tag eruobodo/devops-challenge-image:$BUILD_NUMBER public.ecr.aws/c6p1p1z3/devops-code-challenge2:$BUILD_NUMBER
-                  docker push public.ecr.aws/c6p1p1z3/devops-code-challenge2:$BUILD_NUMBER
-              '''
-            }
+	      steps {
+		      sh '''
+		      aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/c6p1p1z3
+		      docker tag eruobodo/devops-challenge-image:$BUILD_NUMBER public.ecr.aws/c6p1p1z3/devops-code-challenge2:$BUILD_NUMBER
+		      docker push public.ecr.aws/c6p1p1z3/devops-code-challenge2:$BUILD_NUMBER
+		      '''
+	      }
       } 
    }
+	post {
+		always {
+			cleanWs()
+			sh 'docker logout'
+		}
+	}
 }
